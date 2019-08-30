@@ -23,7 +23,11 @@ This simulation may be executed from the command line as follows:
 ./submit_all_sim_binary_bivariate.sh "bivariate_null" 1000 50 1000 1
 ```
 
-This code creates 2 job arrays (one for the alternative hypothesis and one for the null hypothesis), each with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.
+This code creates 2 job arrays (one for the alternative hypothesis and one for the null hypothesis), each with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
+```{sh}
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 1
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 1
+```
 
 ## Plug-in estimators (not cross-validated) based on flexible techniques
 
@@ -33,7 +37,10 @@ This simulation may be executed from the command line as follows:
 ./submit_all_sim_binary_bivariate.sh "bivariate_loss" 1000 50 1000 0
 ```
 
-This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.
+This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
+```{sh}
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 0
+```
 
 ## Effect of not carefully specifying the reward function
 
@@ -43,4 +50,7 @@ This simulation may be executed from the command line as follows:
 ./submit_all_sim_binary_bivariate.sh "bivariate_naive" 1000 50 1000 0
 ```
 
-This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.
+This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
+```{sh}
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_naive" --risk-type "naive" --cv 1
+```
