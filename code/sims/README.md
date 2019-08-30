@@ -11,7 +11,8 @@ Each of the following simulations uses the same R and bash scripts, with varying
 
 The bash scripts are:
 
-*
+* `submit_all_sim_binary_bivariate.sh`: submit all jobs based on the current arguments.
+* `call_all_sim_binary_bivariate.sh`: run a single job based on all three VIMs (deviance, accuracy, AUC) for the given set of parameters.
 
 ## Cross-validated plug-in estimators based on flexible techniques
 
@@ -22,6 +23,8 @@ This simulation may be executed from the command line as follows:
 ./submit_all_sim_binary_bivariate.sh "bivariate_null" 1000 50 1000 1
 ```
 
+This code creates 2 job arrays (one for the alternative hypothesis and one for the null hypothesis), each with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.
+
 ## Plug-in estimators (not cross-validated) based on flexible techniques
 
 This simulation may be executed from the command line as follows:
@@ -30,6 +33,8 @@ This simulation may be executed from the command line as follows:
 ./submit_all_sim_binary_bivariate.sh "bivariate_loss" 1000 50 1000 0
 ```
 
+This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.
+
 ## Effect of not carefully specifying the reward function
 
 This simulation may be executed from the command line as follows:
@@ -37,3 +42,5 @@ This simulation may be executed from the command line as follows:
 ```{sh}
 ./submit_all_sim_binary_bivariate.sh "bivariate_naive" 1000 50 1000 0
 ```
+
+This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results.

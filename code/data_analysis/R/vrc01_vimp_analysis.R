@@ -12,7 +12,7 @@
 ##------------------------------------------------------------------------
 ## load required functions and packages
 # only run this if necessary to update package
-# install.packages("~/Projects/UW/vimp_1.3.0.tar.gz", repos = NULL, type = "source")
+# devtools::install_github("bdwilliamson/vimp@v2.0.0")
 library("vimp")
 library("argparse")
 code_dir <- "../code/"
