@@ -33,6 +33,7 @@ if (!is.na(Sys.getenv("RSTUDIO", unset = NA))) { # if running locally
 ## pull in command-line arguments,
 ## set up the simulation
 ## ---------------------------------------------
+# CHANGE THE NEXT LINE IF YOU ARE RUNNING LOCALLY OR IN A DIFFERENT HPC ENVIRONMENT
 job_id <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 parser <- ArgumentParser()
 parser$add_argument("--sim-name", default = "bivariate_loss",
