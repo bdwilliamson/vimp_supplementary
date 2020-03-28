@@ -35,12 +35,35 @@ This simulation may be executed from the command line as follows:
 
 ```{sh}
 ./submit_all_sim_binary_bivariate.sh "bivariate_loss" 1000 50 1000 0
+./submit_all_sim_binary_bivariate.sh "bivariate_null" 1000 50 1000 0
 ```
 
 This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
 ```{sh}
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 0
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 0
 ```
+
+## Cross-validated and non-cross-validated plug-in estimators using only parametric algorithms
+
+This simulation may be executed from the command line as follows:
+
+```{sh}
+./submit_all_sim_binary_bivariate.sh "bivariate_loss_simple_lib" 1000 50 1000 1
+./submit_all_sim_binary_bivariate.sh "bivariate_null_simple_lib" 1000 50 1000 1
+
+./submit_all_sim_binary_bivariate.sh "bivariate_loss_simple_lib" 1000 50 1000 0
+./submit_all_sim_binary_bivariate.sh "bivariate_null_simple_lib" 1000 50 1000 0
+```
+
+This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
+```{sh}
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_simple_lib" --cv 1
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_simple_lib" --cv 1
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_simple_lib" --cv 0
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_simple_lib" --cv 0
+```
+
 
 ## Effect of not carefully specifying the reward function
 
