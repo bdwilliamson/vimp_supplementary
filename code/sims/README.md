@@ -4,7 +4,7 @@ This file describes how to reproduce the simulations in the "A unified approach 
 
 Each of the following simulations uses the same R and bash scripts, with varying input arguments. The R functions are:
 
-* `sim_binary_bivariate.R`: provided a simulation name `sim_name` (e.g., "bivariate_loss"), risk type `risk_type` (e.g., "expected_loss" for V-measures), variable importance measure `vimp_measure` (e.g., "deviance"), number of total replicates `nreps_total` (e.g., 1000), number of replicates per HPC job `nreps_per_job` (e.g., 50), number of boostrap replicates `b` (e.g., 1000), and cross-validation flag `cv` (e.g., 1 for using cross-validated VIM estimators), runs the simulation for a specified sample size and variable of interest by replicating `run_sim_binary_bivariate_once.R` a total of `nreps_per_job` times.
+* `sim_binary_bivariate.R`: provided a simulation name `sim_name` (e.g., "bivariate_loss"), risk type `risk_type` (e.g., "expected_loss" for V-measures), variable importance measure `vimp_measure` (e.g., "deviance"), number of total replicates `nreps_total` (e.g., 1000), number of replicates per HPC job `nreps_per_job` (e.g., 50), number of boostrap replicates `b` (e.g., 1000), and cross-validation flag `cv` (e.g., 1 for using cross-fitted VIM estimators), runs the simulation for a specified sample size and variable of interest by replicating `run_sim_binary_bivariate_once.R` a total of `nreps_per_job` times.
 * `run_sim_binary_bivariate_once.R`: using arguments specified in `sim_binary_bivariate.R`, runs the simulation a single time; calls `sim_binary_bivariate_data.R` to create the data, and `sim_binary_bivariate_ests.R` to run the estimators.
 * `sim_binary_bivariate_data.R`: creates a single dataset of the given sample size from the specified distribution.
 * `sim_binary_bivariate_ests.R`: provides the VIM estimators.
@@ -14,7 +14,7 @@ The bash scripts are:
 * `submit_all_sim_binary_bivariate.sh`: submit all jobs based on the current arguments.
 * `call_all_sim_binary_bivariate.sh`: run a single job based on all three VIMs (deviance, accuracy, AUC) for the given set of parameters.
 
-## Cross-validated plug-in estimators based on flexible techniques
+## Cross-fitted plug-in estimators based on flexible techniques
 
 This simulation may be executed from the command line as follows:
 
@@ -29,7 +29,7 @@ Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 1
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 1
 ```
 
-## Plug-in estimators (not cross-validated) based on flexible techniques
+## Plug-in estimators (not cross-fitted) based on flexible techniques
 
 This simulation may be executed from the command line as follows:
 
@@ -44,7 +44,7 @@ Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 0
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 0
 ```
 
-## Cross-validated and non-cross-validated plug-in estimators using only parametric algorithms
+## Cross-fitted and non-cross-fitted plug-in estimators using only parametric algorithms
 
 This simulation may be executed from the command line as follows:
 
@@ -76,4 +76,19 @@ This simulation may be executed from the command line as follows:
 This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
 ```{sh}
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_naive" --risk-type "naive" --cv 1
+```
+
+## Effect of not using sample-splitting for hypothesis testing the $\beta$-null hypothesis with $\beta = 0.05$
+
+This simulation uses different R functions (`sim_no_sample_splitting.R`, `run_sim_no_ss_once.R`, `sim_no_ss_ests.R`) and shell scripts (`call_all_sim_no_ss.sh`, `submit_all_sim_no_ss.sh`) than the other simulations, but the files have nearly identical structure to the files described above. To replicate this simulation, run:
+
+```{sh}
+./submit_all_sim_no_ss.sh "bivariate_loss_no_ss" 1000 50 1000 1
+./submit_all_sim_no_ss.sh "bivariate_loss_no_ss" 1000 50 1000 0
+```
+
+This code creates two job arrays with 400 jobs each (one for cross-fitting, one without cross-fitting). Once you have the results of this simulation, run the following code to generate plots and summaries of the results:
+```{r}
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_no_ss" --risk-type "expected_loss" --cv 1 --vimp-measure "accuracy" "auc" --delta 0.05 --plot-all 0
+Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_no_ss" --risk-type "expected_loss" --cv 0 --vimp-measure "accuracy" "auc" --delta 0.05 --plot-all 0
 ```

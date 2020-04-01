@@ -11,7 +11,7 @@ We have separated our code further into two sub-directories based on the two mai
 1. Numerical experiments to evaluate the operating characteristics of our proposed method under varying data-generating mechanisms (`sims`).
 2. An analysis of an antibody against HIV-1 infection (`data_analysis`).
 
-Within each sub-directory, we further subdivide the code into an R directory (hosting all of the R code for the analysis) and a Shell directory (hosting all of the code for batch submission to a high-performance cluster computing environment). All analyses were performed on a Linux cluster using the Slurm batch scheduling system. If you use a difference batch scheduling system, the individual code files are flagged with the line where you can change batch variables. If you prefer to run the analyses locally, you may -- however, these analyses will then take a large amount of time.
+All analyses were performed on a Linux cluster using the Slurm batch scheduling system. The head node of the batch scheduler allows the shorthand "ml" in place of "module load". If you use a difference batch scheduling system, the individual code files are flagged with the line where you can change batch variables. If you prefer to run the analyses locally, you may -- however, these analyses will then take a large amount of time.
 
 -----
 
