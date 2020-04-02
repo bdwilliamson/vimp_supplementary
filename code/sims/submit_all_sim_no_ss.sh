@@ -9,10 +9,11 @@ ml jbigkit
 ## 3: the number of replicates per batch job (e.g., 50)
 ## 4: the number of bootstrap replicates (e.g., 1000)
 ## 5: whether or not to run cv (1 is run, 0 is not)
+## 6: delta (0 or 0.05)
 
 ## num_n_j is the number of unique n, j combinations (16 ns * 2 js for small n simulation)
 num_n_j=20
 njobs=`expr $2 / $3 \* $num_n_j`
 echo $njobs
 
-sbatch --array=1-$njobs ./call_all_sim_no_ss.sh $1 $2 $3 $4 $5
+sbatch --array=1-$njobs ./call_all_sim_no_ss.sh $1 $2 $3 $4 $5 $6
