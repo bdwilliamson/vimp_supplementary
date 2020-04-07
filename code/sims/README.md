@@ -77,28 +77,3 @@ This code creates one job array with 400 jobs. Once you have the results from th
 ```{sh}
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_naive" --risk-type "naive" --cv 1
 ```
-
-## Effect of not using sample-splitting for hypothesis testing
-
-This simulation uses different R functions (`sim_no_sample_splitting.R`, `run_sim_no_ss_once.R`, `sim_no_ss_ests.R`) and shell scripts (`call_all_sim_no_ss.sh`, `submit_all_sim_no_ss.sh`) than the other simulations, but the files have nearly identical structure to the files described above. To replicate this simulation, run:
-
-```{sh}
-./submit_all_sim_no_ss.sh "bivariate_loss_no_ss" 1000 50 1000 1 0.05
-./submit_all_sim_no_ss.sh "bivariate_loss_no_ss" 1000 50 1000 0 0.05
-
-./submit_all_sim_no_ss.sh "bivariate_null_no_ss" 1000 50 1000 1 0
-./submit_all_sim_no_ss.sh "bivariate_null_no_ss" 1000 50 1000 0 0
-
-./submit_all_sim_no_ss.sh "bivariate_null_no_ss" 1000 50 1000 1 0.05
-./submit_all_sim_no_ss.sh "bivariate_null_no_ss" 1000 50 1000 0 0.05
-
-```
-
-This code creates six job arrays with 400 jobs each (two for a scenario where both features have nonzero importance [with and without cross-fitting], and four for a scenario where one feature has zero importance [with and without cross-fitting, and testing the strict and $\beta$-null]). Once you have the results of this simulation, run the following code to generate plots and summaries of the results:
-```{r}
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_no_ss" --risk-type "expected_loss" --cv 1 --vimp-measure "accuracy" "auc" --delta 0.05 --plot-all 0
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_no_ss" --risk-type "expected_loss" --cv 0 --vimp-measure "accuracy" "auc" --delta 0.05 --plot-all 0
-
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_no_ss" --risk-type "expected_loss" --cv 1 --vimp-measure "accuracy" "auc" --delta 0 0.05 --plot-all 0
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_no_ss" --risk-type "expected_loss" --cv 0 --vimp-measure "accuracy" "auc" --delta 0 0.05 --plot-all 0
-```
