@@ -1,6 +1,6 @@
 # Running the data analysis for the general `vimp` paper
 
-This file describes how to reproduce the data analysis in Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020) ["A unified approach for inference on algorithm-agnostic variable importance"](). The code in this file uses the prediction functions estimated as a result of "Prediction of VRC01 neutralization sensitivity by HIV-1 gp160 sequence features" by Magaret, Benkeser, Williamson et al. (2019). All analyses are run using R version 3.5.3 and the `vimp` package version 2.0.1.
+This file describes how to reproduce the data analysis in "A unified approach for inference on algorithm-agnostic variable importance" by Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020). The code in this file uses the prediction functions estimated as a result of "Prediction of VRC01 neutralization sensitivity by HIV-1 gp160 sequence features" by Magaret, Benkeser, Williamson et al. (2019). All analyses are run using R version 3.5.3 and the `vimp` package version 2.0.1.
 
 The R scripts contain the code necessary to compute estimates:
 * `get_catnap_data.R`: get the CATNAP data used in Magaret, Benkeser, Williamson et al. (*PLoS Computational Biology*, 2019)
