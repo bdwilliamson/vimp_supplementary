@@ -1,10 +1,10 @@
 # Running the numerical experiments for the general `vimp` paper
 
-This file describes how to reproduce the simulations in the "A unified approach to nonparametric variable importance assessment" by Williamson, Gilbert, Carone, and Simon. While the code in this file assumes that the user is submitting batch jobs to a high-performance computing (HPC) cluster using the Slurm batch scheduing system, minor edits to these commands allow the use of either local or alternative HPC cluster environments.
+This file describes how to reproduce the simulations in the "A unified approach for inference on algorithm-agnostic variable importance" by Williamson, Gilbert, Simon, and Carone. While the code in this file assumes that the user is submitting batch jobs to a high-performance computing (HPC) cluster using the Slurm batch scheduing system, minor edits to these commands allow the use of either local or alternative HPC cluster environments. All analyses are run using R version 3.5.3 and the package `vimp` version 2.0.1.
 
 Each of the following simulations uses the same R and bash scripts, with varying input arguments. The R functions are:
 
-* `sim_binary_bivariate.R`: provided a simulation name `sim_name` (e.g., "bivariate_loss"), risk type `risk_type` (e.g., "expected_loss" for V-measures), variable importance measure `vimp_measure` (e.g., "deviance"), number of total replicates `nreps_total` (e.g., 1000), number of replicates per HPC job `nreps_per_job` (e.g., 50), number of boostrap replicates `b` (e.g., 1000), and cross-validation flag `cv` (e.g., 1 for using cross-validated VIM estimators), runs the simulation for a specified sample size and variable of interest by replicating `run_sim_binary_bivariate_once.R` a total of `nreps_per_job` times.
+* `sim_binary_bivariate.R`: provided a simulation name `sim_name` (e.g., "bivariate_loss"), risk type `risk_type` (e.g., "expected_loss" for V-measures), variable importance measure `vimp_measure` (e.g., "deviance"), number of total replicates `nreps_total` (e.g., 1000), number of replicates per HPC job `nreps_per_job` (e.g., 50), number of boostrap replicates `b` (e.g., 1000), and cross-validation flag `cv` (e.g., 1 for using cross-fitted VIM estimators), runs the simulation for a specified sample size and variable of interest by replicating `run_sim_binary_bivariate_once.R` a total of `nreps_per_job` times.
 * `run_sim_binary_bivariate_once.R`: using arguments specified in `sim_binary_bivariate.R`, runs the simulation a single time; calls `sim_binary_bivariate_data.R` to create the data, and `sim_binary_bivariate_ests.R` to run the estimators.
 * `sim_binary_bivariate_data.R`: creates a single dataset of the given sample size from the specified distribution.
 * `sim_binary_bivariate_ests.R`: provides the VIM estimators.
@@ -14,7 +14,7 @@ The bash scripts are:
 * `submit_all_sim_binary_bivariate.sh`: submit all jobs based on the current arguments.
 * `call_all_sim_binary_bivariate.sh`: run a single job based on all three VIMs (deviance, accuracy, AUC) for the given set of parameters.
 
-## Cross-validated plug-in estimators based on flexible techniques
+## Cross-fitted plug-in estimators based on flexible techniques
 
 This simulation may be executed from the command line as follows:
 
@@ -29,7 +29,7 @@ Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 1
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 1
 ```
 
-## Plug-in estimators (not cross-validated) based on flexible techniques
+## Plug-in estimators (not cross-fitted) based on flexible techniques
 
 This simulation may be executed from the command line as follows:
 
@@ -44,7 +44,7 @@ Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 0
 Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 0
 ```
 
-## Cross-validated and non-cross-validated plug-in estimators using only parametric algorithms
+## Cross-fitted and non-cross-fitted plug-in estimators using only parametric algorithms
 
 This simulation may be executed from the command line as follows:
 

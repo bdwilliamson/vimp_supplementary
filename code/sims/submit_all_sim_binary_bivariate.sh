@@ -15,4 +15,4 @@ num_n_j=20
 njobs=`expr $2 / $3 \* $num_n_j`
 echo $njobs
 
-sbatch -M beagle --array=1-$njobs ./call_all_sim_binary_bivariate.sh $1 $2 $3 $4 $5
+sbatch --array=1-$njobs ./call_all_sim_binary_bivariate.sh $1 $2 $3 $4 $5

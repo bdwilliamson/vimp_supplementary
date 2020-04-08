@@ -1,14 +1,26 @@
 # Running the data analysis for the general `vimp` paper
 
-This file describes how to reproduce the data analysis in the "A unified approach to nonparametric variable importance assessment" by Williamson, Gilbert, Carone, and Simon. The code in this file uses the prediction functions estimated as a result of "Prediction of VRC01 neutralization sensitivity by HIV-1 gp160 sequence features" by Magaret, Benkeser, Williamson et al. (2019). Please run all code from [this GitHub repository](https://github.com/benkeser/vrc01) prior to running any analyses for the current paper.
+This file describes how to reproduce the data analysis in the "A unified approach for inference on algorithm-agnostic variable importance" by Williamson, Gilbert, Simon, and Carone. The code in this file uses the prediction functions estimated as a result of "Prediction of VRC01 neutralization sensitivity by HIV-1 gp160 sequence features" by Magaret, Benkeser, Williamson et al. (2019). All analyses are run using R version 3.5.3 and the `vimp` package version 2.0.1.
 
-Running `vrc01_vimp_analysis_compute_group_vimp.R` computes variable importance estimates for the groups defined by Magaret et al. (2019) based on the fitted values resulting from the analysis of Magaret et al. (2019), but using the deviance, accuracy, and AUC.
+The R scripts contain the code necessary to compute estimates:
+* `get_catnap_data.R`: get the CATNAP data used in Magaret, Benkeser, Williamson et al. (2019)
+* `run_super_learners.R`: run the specified Super Learner estimator on the CATNAP data, for the specified outcome
+* `get_vimp.R`: obtain estimates of variable importance, defined using R-squared, AUC, and classification accuracy
+* `render_plots.R`: generate plots based on a variable importance analysis
+* `super_learner_libraries.R`: functions to define the Super Learner library
+* `utils.R`: various utility functions
 
-Running `vrc01_vimp_analysis_compute_group_vimp.R` computes variable importance estimates for the individual features defined by Magaret et al. (2019) based on the fitted values resulting from the analysis of Magaret et al. (2019), but using the deviance, accuracy, and AUC.
+The bash scripts run the analysis:
+* `run_analysis.sh`: run the full analysis for the specified outcome
+* `run_analysis_indi_only.sh`: run the analysis only for individual variable importance
+* `run_reduced_analysis.sh`: run for a specified subgroup of groups
+* `run_sl_geog_only.sh`: run for only geographic confounders
+* `submit_analysis_indi_only.sh`: submit batch jobs for individual VIM analysis
+* `submit_analysis.sh`: submit batch jobs for full analysis
+* `render_plots.sh`: render plots once we have the required output
 
-
-Running `vrc01_vimp_analysis.R` loads in the results of the previous two function calls and creates plots and tables of results.
-
-These three functions rely on `vrc01_vimp_analysis_helpers.R` for utility functions.
-
-The final plots for the paper are created using `vrc01_vimp_analysis_final_plots.R`.
+The analyses presented in the manuscript can be replicated using the following code (note that this may take some time to run):
+```{sh}
+./run_analysis.sh "cens"
+./render_plots.sh
+```

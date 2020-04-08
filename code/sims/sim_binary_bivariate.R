@@ -11,7 +11,7 @@
 ## ---------------------------------------------
 library("SuperLearner")
 # only run this if necessary to update package
-# devtools::install_github("bdwilliamson/vimp@v2.0.0")
+# devtools::install_github("bdwilliamson/vimp@v2.0.1")
 library("vimp")
 library("methods")
 library("argparse")
