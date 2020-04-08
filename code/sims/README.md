@@ -1,6 +1,6 @@
 # Running the numerical experiments for the general `vimp` paper
 
-This file describes how to reproduce the simulations in the "A unified approach for inference on algorithm-agnostic variable importance" by Williamson, Gilbert, Simon, and Carone. While the code in this file assumes that the user is submitting batch jobs to a high-performance computing (HPC) cluster using the Slurm batch scheduing system, minor edits to these commands allow the use of either local or alternative HPC cluster environments. All analyses are run using R version 3.5.3 and the package `vimp` version 2.0.1.
+This file describes how to reproduce the simulations in Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020) ["A unified approach for inference on algorithm-agnostic variable importance"](). While the code in this file assumes that the user is submitting batch jobs to a high-performance computing (HPC) cluster using the Slurm batch scheduing system, minor edits to these commands allow the use of either local or alternative HPC cluster environments. All analyses are run using R version 3.5.3 and the package `vimp` version 2.0.1.
 
 Each of the following simulations uses the same R and bash scripts, with varying input arguments. The R functions are:
 
