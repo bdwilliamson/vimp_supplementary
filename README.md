@@ -1,6 +1,6 @@
 # Supplementary materials for the general `vimp` paper
 
-This repository contains code to reproduce the analyses in "A unified approach for inference on algorithm-agnostic variable importance" by Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020). All analyses were implemented in the freely available R programming language; specifically, version 3.5.3. All analyses use the R package `vimp` version 2.0.1.
+This repository contains code to reproduce the analyses in ["A unified approach for inference on algorithm-agnostic variable importance"](https://arxiv.org/abs/2004.03683) by Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020). All analyses were implemented in the freely available R programming language; specifically, version 3.5.3. All analyses use the R package `vimp` version 2.0.1.
 
 This README file provides an overview of the code available in the repository.  
 
