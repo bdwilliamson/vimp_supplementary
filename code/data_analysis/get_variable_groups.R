@@ -36,8 +36,12 @@ get_variable_groups <- function(data) {
     pngs_ind_1 <- which(colnames(data) == "hxb2.29.sequon_actual.1mer")  # the first index
     pngs_ind_2 <- which(colnames(data) == "hxb2.824.sequon_actual.1mer")  # the last index
     pngs_init <- colnames(data)[pngs_ind_1:pngs_ind_2]
-    pngs_aa_pos <- unlist(lapply(strsplit(pngs_init, ".", fixed = TRUE), function(x) x[2]))
-    pngs_novrc01_sites <- pngs_aa_pos[!(pngs_aa_pos %in% vrc01_contact_sites) & !(pngs_aa_pos %in% sort(c(cd4_binding_sites, esa_sites, glyco_sites, covar_sites, png_sites)))]
+    pngs_aa_pos <- as.numeric(unlist(lapply(strsplit(pngs_init, ".", fixed = TRUE), 
+                                            function(x) x[2])))
+    pngs_novrc01_sites <- pngs_aa_pos[!(pngs_aa_pos %in% vrc01_contact_sites) & 
+                                          !(pngs_aa_pos %in% sort(c(cd4_binding_sites, 
+                                                                    esa_sites, glyco_sites, 
+                                                                    covar_sites, png_sites)))]
     ## Group 9: majority virus subtypes (already created, subtype_vars above)
     ## Group 10: region-specific counts of PNG sites
     glycosylation_vars <- colnames(dat)[grepl("sequons", colnames(dat))]
@@ -59,4 +63,33 @@ get_variable_groups <- function(data) {
     aa_gp41_vars <- get_variable_group(all_data_names, gp41_sites)
     aa_pngs_novrc01_vars <- get_variable_group(all_data_names, pngs_novrc01_sites)
     return(list(vrc01 = aa_vrc01_vars, cd4bs = aa_cd4bs_vars, esa = aa_esa_vars, glyco = aa_glyco_vars, covar = aa_covar_vars, pngs = aa_png_vars, gp41 = aa_gp41_vars, pngs_novrc01 = aa_pngs_novrc01_vars, subtype = subtype_vars, sequons = glycosylation_vars, geometry = geometry_vars, cysteines = cysteine_vars, steric_bulk = steric_bulk_vars, geog = geog_vars))
+}
+
+# get individual intrinsic importance groups
+# @param pred_names the variable names to use
+# @param ind_importance_type the type of individual importance
+get_individual_features <- function(pred_names, ind_importance_type) {
+    if (grepl("site", ind_importance_type)) {
+        no_hxb2 <- gsub(".1mer", "", gsub("hxb2.", "", pred_names))
+        non_site_vars <- pred_names[!grepl("hxb2", pred_names)]
+        site_vars <- no_hxb2[grepl("hxb2", pred_names)]
+        sites <- sort(as.numeric(unique(unlist(lapply(
+            strsplit(site_vars, ".", fixed = TRUE),
+            function(x) x[1]
+        )))))
+        site_lst <- sapply(
+            1:length(sites),
+            function(i) {
+                pred_names[grepl(
+                    paste0("hxb2.", sites[i], "."), pred_names, fixed = TRUE
+                )]
+            }, simplify = FALSE
+        )
+        lst <- c(as.list(non_site_vars), site_lst)
+        names(lst) <- c(non_site_vars, paste0("hxb2_", sites))
+    } else {
+        lst <- as.list(pred_names)
+        names(lst) <- pred_names
+    }
+    lst
 }

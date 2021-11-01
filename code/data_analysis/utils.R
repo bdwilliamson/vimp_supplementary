@@ -1,5 +1,75 @@
 #!/usr/bin/env Rscript
 
+# determine the outcome 
+get_outcome <- function(outcome_name) {
+  full_outcome_name <- "ic50.censored"
+  if (outcome_name == "cens") {
+    full_outcome_name <- "ic50.censored"
+  }
+  if (grepl("sens.resis", outcome_name)) {
+    full_outcome_name <- "binding.dichotomous.sens.resis"
+  }
+  if (grepl("sens50", outcome_name)) {
+    full_outcome_name <- "sens50"
+  }
+  if (grepl("sens80", outcome_name)) {
+    full_outcome_name <- "sens80"
+  }
+  full_outcome_name
+}
+# determine SL options based on outcome name
+get_sl_options <- function(outcome_name, V = 10) {
+  if (grepl("cens", outcome_name) | grepl("sens", outcome_name)) {
+    sl_fam <- "binomial"
+    cv_ctrl_lst <- list(V = V, stratifyCV = TRUE)
+    sl_method <- "tmp_method.CC_nloglik"
+  } else {
+    sl_fam <- "gaussian"
+    cv_ctrl_lst <- list(V = V)
+    sl_method <- "tmp_method.CC_LS"
+  }
+  return(list(fam = sl_fam, ctrl = cv_ctrl_lst, method = sl_method))
+}
+make_folds <- function(y, V, stratified = TRUE) {
+  if (stratified) {
+    y_1 <- y == 1
+    y_0 <- y == 0
+    folds_1 <- rep(seq_len(V), length = sum(y_1))
+    folds_1 <- sample(folds_1)
+    folds_0 <- rep(seq_len(V), length = sum(y_0))
+    folds_0 <- sample(folds_0)
+    folds <- vector("numeric", length(draw$y_cat))
+    folds[y_1] <- folds_1
+    folds[y_0] <- folds_0
+  } else {
+    folds <- rep(seq_len(V), length = length(y))
+    folds <- sample(folds)
+  }
+  return(folds)
+}
+
+# for variable importance
+make_vimp_list <- function(var_groups, var_inds) {
+  list_names <- c("conditional", "marginal", "individual")
+  lst <- sapply(list_names, function(x) NULL, simplify = FALSE)
+  return(lst)
+}
+get_cv_folds <- function(folds_lst) {
+  V <- length(folds_lst)
+  v_lst <- sapply(1:V, function(s) rep(s, length(folds_lst[[s]])), simplify = FALSE)
+  joint_lst <- mapply(list, v_lst, folds_lst, SIMPLIFY = FALSE)
+  folds_mat <- do.call(rbind, lapply(joint_lst, function(x) cbind(x[[1]], x[[2]])))
+  folds <- folds_mat[order(folds_mat[, 2]), 1]
+  return(folds)
+}
+make_cv_lists <- function(folds_lst, full_vec, redu_vec) {
+  folds <- get_cv_folds(folds_lst)
+  ## make lists of the fitted values
+  full_lst <- lapply(as.list(1:length(unique(folds))), function(x) full_vec[folds == x])
+  redu_lst <- lapply(as.list(1:length(unique(folds))), function(x) redu_vec[folds == x])
+  return(list(folds = folds, full_lst = full_lst, redu_lst = redu_lst))
+}
+
 ## plot vimp for a single outcome/group combination
 ## @param vimp_obj the variable importance object
 ## @param title the title of the plot
@@ -10,14 +80,24 @@
 ## @param main_font_size the size of text
 ## @param cv whether or not this is cv importance
 ## @param num_plot the number of features to plot (in descending order)
-plot_one_vimp <- function(vimp_obj, title = "Variable importance", x_lim = c(0, 1), x_lab = expression(paste(R^2)), lgnd_pos = c(0.1, 0.3), point_size = 5, main_font_size = 20, plot_font_size = 6, axis_font_size = 18, cv = FALSE, num_plot = 50, threshold = 0.05, plot_vimp_nm = NULL) {
-    text_pos <- x_lim[2] - 0.05
-    signif_pos <- x_lim[2] - 0.025
+## @param threshold significance threshold
+## @param plot_vimp_nm should we plot names?
+## @param num_only should we plot the "s" value only?
+## @param x_adjust how much should we left-adjust text from the right-hand side?
+## @param num_digits the number of digits to round CIs to
+plot_one_vimp <- function(vimp_obj, title = "Variable importance", x_lim = c(0, 1), 
+                          x_lab = expression(paste(R^2)), lgnd_pos = c(0.1, 0.3), 
+                          point_size = 5, main_font_size = 20, plot_font_size = 6, 
+                          axis_font_size = 18, cv = FALSE, num_plot = 50, 
+                          threshold = 0.05, plot_vimp_nm = NULL, num_only = FALSE,
+                          x_adjust = 0.025, num_digits = 2) {
+    text_pos <- x_lim[2] - x_adjust
+    signif_pos <- x_lim[2] - x_adjust / 2
     if (!is.null(vimp_obj)) {
         ## get the variable importances
         if (!is.null(vimp_obj$mat)) {
             vimp_est <- vimp_obj$mat
-            vimp_est$group <- vimp_nice_rownames(vimp_obj, num_only = TRUE, cv = cv)
+            vimp_est$group <- vimp_nice_rownames(vimp_obj, num_only = num_only, cv = cv)
         } else {
             vimp_est <- cbind(est = vimp_obj$est, se = vimp_obj$se, cil = vimp_obj$cil, ciu = vimp_obj$ciu, p_value = vimp_obj$p_value)
             print_s <- ifelse(length(vimp_obj$s) <= 10,
@@ -25,11 +105,12 @@ plot_one_vimp <- function(vimp_obj, title = "Variable importance", x_lim = c(0, 
                           paste(c(vimp_obj$s[1:10], "..."), collapse = ", "))
             vimp_est$group <- paste("s = ", print_s, sep = "")
         }
-        tmp_cis <- round(vimp_est[, c("cil", "ciu")], 3)
+        tmp_cis <- round(vimp_est[, c("cil", "ciu")], num_digits)
         text_cis <- apply(tmp_cis, 1, function(x) paste0("[", x[1], ", ", x[2], "]"))
         vimp_est <- tibble::add_column(vimp_est, text_ci = text_cis)
         vimp_est <- tibble::add_column(vimp_est, signif_p = ifelse(vimp_est$p_value < threshold, "*", ""))
         dim_plot <- ifelse(num_plot > dim(vimp_est)[1], dim(vimp_est)[1], num_plot)
+        y_lab <- ifelse(any(grepl("hxb2", vimp_est$group)), "AA site / feature", "Feature group")
         ## plot by ordered vimp measure
         vimp_plot <- vimp_est %>%
             arrange(desc(est)) %>%
@@ -42,11 +123,21 @@ plot_one_vimp <- function(vimp_obj, title = "Variable importance", x_lim = c(0, 
             geom_text(aes(x = rep(signif_pos, dim_plot), label = signif_p), hjust = "inward", size = plot_font_size, color = "blue") +
             ggtitle(title) +
             xlab(x_lab) +
-            ylab("Feature group") +
+            ylab(y_lab) +
             scale_x_continuous(breaks = round(seq(x_lim[1], x_lim[2], 0.1), 1),
                            labels = as.character(round(seq(x_lim[1], x_lim[2], 0.1), 1)),
                            limits = x_lim) +
-            theme(axis.line = element_blank(), panel.border = element_rect(fill = NA, color = "black", linetype = 1, size = 1), plot.title = element_text(size = main_font_size), axis.title = element_text(size = axis_font_size), axis.text = element_text(size = axis_font_size), legend.text = element_text(size = axis_font_size), legend.title = element_text(size = axis_font_size), legend.position = lgnd_pos, text = element_text(size = main_font_size))
+            theme(axis.line = element_blank(), 
+                  panel.border = element_rect(fill = NA, color = "black", 
+                                              linetype = 1, size = 1), 
+                  plot.title = element_text(size = main_font_size), 
+                  axis.title = element_text(size = axis_font_size), 
+                  axis.text = element_text(size = axis_font_size), 
+                  legend.text = element_text(size = axis_font_size), 
+                  legend.title = element_text(size = axis_font_size), 
+                  legend.position = lgnd_pos, 
+                  text = element_text(size = main_font_size),
+                  panel.grid.major.x = element_line(color = "grey85"))
         return(vimp_plot)
     } else {
         print("No variable importance estimates to plot.")
@@ -73,6 +164,8 @@ vimp_plot_name_expr <- function(vimp_str) {
     plot_nms[grepl("dichotomous.2", vimp_str)] <- expression(bold(paste("Multiple sensitivity;")))
     plot_nms[grepl("censored", vimp_str)] <- expression(bold(paste(IC[50], " Censored;")))
     plot_nms[grepl("sens.resis", vimp_str)] <- expression(bold(paste("Sensitive/Resistant Only;")))
+    plot_nms[grepl("sens80", vimp_str)] <- expression(bold(paste(IC[80], " < 1;")))
+    plot_nms[grepl("sens50", vimp_str)] <- expression(bold(paste(IC[50], " < 1;")))
     return(plot_nms)
 }
 vimp_plot_name_expr_simple <- function(vimp_str) {
@@ -84,22 +177,30 @@ vimp_plot_name_expr_simple <- function(vimp_str) {
   plot_nms[grepl("dichotomous.2", vimp_str)] <- expression(bold(paste("Multiple sensitivity;")))
   plot_nms[grepl("censored", vimp_str)] <- expression(bold(paste("Resistant;")))
   plot_nms[grepl("sens.resis", vimp_str)] <- expression(bold(paste("Sensitive/Resistant Only;")))
+  plot_nms[grepl("sens80", vimp_str)] <- expression(bold(paste("Sensitive;")))
+  plot_nms[grepl("sens50", vimp_str)] <- expression(bold(paste("Sensitive;")))
   return(plot_nms)
 }
 vimp_nice_rownames <- function(vimp_obj, num_only = FALSE, cv = FALSE) {
     mat_s <- vimp_obj$mat$s
     lst_s <- vimp_obj$s
-    indx_mat <- sapply(1:length(mat_s), function(x) which(mat_s[x] == lst_s))
+    indx_lst <- lapply(as.list(1:length(mat_s)), function(x) which(mat_s[x] == lst_s))
+    null_chr <- which(unlist(lapply(indx_lst, function(x) length(x) > 1)))
+    for (i in seq_len(length(null_chr))) {
+      indx_lst[[null_chr[i]]] <- indx_lst[null_chr][[i]][i]
+    }
+    indx_mat <- unlist(indx_lst)
     paste_ind <- 3
     if (cv) {
         paste_ind <- 4
     }
-    tmp_nms <- unlist(lapply(strsplit(names(lst_s), "_", fixed = TRUE), function(x) paste(x[paste_ind:length(x)], collapse = "_")))
+    tmp_nms <- unlist(lapply(strsplit(names(lst_s), "_", fixed = TRUE), 
+                             function(x) paste(x[paste_ind:length(x)], collapse = "_")))
     if (num_only) {
-        return(as.character(indx_mat))
+      return(as.character(indx_mat))
     } else {
-        return(tmp_nms[indx_mat])
-    }
+      return(tmp_nms[indx_mat])
+    }  
 }
 
 ## ----------------------------------------------------
@@ -279,7 +380,11 @@ plot.myCV.SuperLearner <- function (x, package = "ggplot2", constant = qnorm(0.9
             ggplot2::xlab("Method") +
             ggplot2::ggtitle(main_title) +
             scale_y_continuous(limits=c(xlim1, xlim2), oob = scales::squish) +
-            ggplot2::theme(axis.text = element_text(size = text_size))
+            ggplot2::theme(axis.text = element_text(size = text_size),
+                           axis.title = element_text(size = text_size),
+                           legend.text = element_text(size = text_size),
+                           legend.title = element_text(size = text_size),
+                           panel.grid.major.x = element_line(color = "grey85"))
     }
     return(p)
 }
@@ -287,7 +392,8 @@ plot.myCV.SuperLearner <- function (x, package = "ggplot2", constant = qnorm(0.9
 plot_roc_curves <- function(cv_fit, topRank = 1,
                             cols = c(rgb(78, 103, 102, alpha = 255/2, maxColorValue = 255),
                                      rgb(90,177,187, alpha = 255/2, maxColorValue = 255),
-                                     rgb(165, 200, 130, alpha = 255/2, maxColorValue = 255))) {
+                                     rgb(165, 200, 130, alpha = 255/2, maxColorValue = 255)),
+                            text_size = 12, legend_text_size = 8) {
   class(cv_fit) <- "myCV.SuperLearner"
   allAlgos <- summary(cv_fit, method = "method.AUC")$Table %>% mutate(Algorithm = as.character(Algorithm))
   allCandidates <- allAlgos[-(1:2), ] %>% arrange(-Ave)
@@ -311,7 +417,10 @@ plot_roc_curves <- function(cv_fit, topRank = 1,
     unnest(roc.dat) %>%
     ggplot(aes(x=xval, y=yval, col=algo)) +
     geom_step(lwd=2) +
-    theme(legend.position = "top") +
+    theme(legend.position = "top", axis.text = element_text(size = text_size),
+          axis.title = element_text(size = text_size),
+          legend.text = element_text(size = legend_text_size),
+          legend.title = element_text(size = legend_text_size)) +
     scale_color_manual(values = cols) +
     labs(x = "Cross-Validated False Positive Rate", y = "Cross-Validated True Positive Rate", col = "Algorithm")
 }

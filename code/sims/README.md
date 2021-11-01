@@ -1,79 +1,101 @@
 # Running the numerical experiments for the general `vimp` paper
 
-This file describes how to reproduce the simulations in ["A unified approach for inference on algorithm-agnostic variable importance"](https://arxiv.org/abs/2004.03683) by Williamson, Gilbert, Simon, and Carone (*arXiv*, 2020). While the code in this file assumes that the user is submitting batch jobs to a high-performance computing (HPC) cluster using the Slurm batch scheduing system, minor edits to these commands allow the use of either local or alternative HPC cluster environments. All analyses are run using R version 3.5.3 and the package `vimp` version 2.0.1.
+This file describes how to reproduce the simulations in ["A general framework for inference on algorithm-agnostic variable importance"](https://arxiv.org/abs/2004.03683) by Williamson, Gilbert, Simon, and Carone (*Journal of the American Statistical Association (Theory & Methods)*, 2021). All analyses were implemented in the freely available R programming language; specifically, version 4.0.2. All analyses use the R package `vimp` version 2.2.3.
 
-Each of the following simulations uses the same R and bash scripts, with varying input arguments. The R functions are:
+The numerical experiments consist of four sections: first, we consider the properties of our proposal under the alternative hypothesis (Scenario 1, with two important features); next, we consider the properties of our proposal under the null hypothesis (Scenario 2, with four features, two of which are important and two of which are unimportant). We next consider a bootstrap for interval estimation under the alternative hypothesis. Finally, we investigate the properties of our proposal with a larger number of features (both with and without correlation).
 
-* `sim_binary_bivariate.R`: provided a simulation name `sim_name` (e.g., "bivariate_loss"), risk type `risk_type` (e.g., "expected_loss" for V-measures), variable importance measure `vimp_measure` (e.g., "deviance"), number of total replicates `nreps_total` (e.g., 1000), number of replicates per HPC job `nreps_per_job` (e.g., 50), number of boostrap replicates `b` (e.g., 1000), and cross-validation flag `cv` (e.g., 1 for using cross-fitted VIM estimators), runs the simulation for a specified sample size and variable of interest by replicating `run_sim_binary_bivariate_once.R` a total of `nreps_per_job` times.
-* `run_sim_binary_bivariate_once.R`: using arguments specified in `sim_binary_bivariate.R`, runs the simulation a single time; calls `sim_binary_bivariate_data.R` to create the data, and `sim_binary_bivariate_ests.R` to run the estimators.
-* `sim_binary_bivariate_data.R`: creates a single dataset of the given sample size from the specified distribution.
-* `sim_binary_bivariate_ests.R`: provides the VIM estimators.
+To obtain the true values of accuracy and AUC under our simulation model, we used the file `compute_truths_probit.R`.
 
-The bash scripts are:
+## Properties of our proposal under the alternative hypothesis
 
-* `submit_all_sim_binary_bivariate.sh`: submit all jobs based on the current arguments.
-* `call_all_sim_binary_bivariate.sh`: run a single job based on all three VIMs (deviance, accuracy, AUC) for the given set of parameters.
+The following code will replicate the results in Section 5.2 of the main manuscript (Figure 2) and Section 4.2 of the Supplementary Material (Figures S1--S4).
 
-## Cross-fitted plug-in estimators based on flexible techniques
+The simulation uses the following files:
+* `submit_all_alt_investigation.sh`: Submit all simulations for this section.
+* `submit_alt_investigation.sh`: Batch submission of a group of jobs to a Slurm scheduler.
+* `investigate_alternative_properties.R`: the main R script for this simulation. Runs the simulation `nreps_per_job` times for a specified set of parameters.
+* `investigate_alternative_once.R`: Runs the simulation a single time for a specified set of parameters.
+* `gen_data.R`: Generate a dataset.
+* `run_ests.R`: Run a single estimator (SuperLearner, random forests, logistic regression, GAMs, etc.) with or without cross-fitting and sample-splitting
+* `utils.R`: Utility functions.
 
-This simulation may be executed from the command line as follows:
-
-```{sh}
-./submit_all_sim_binary_bivariate.sh "bivariate_loss" 1000 50 1000 1
-./submit_all_sim_binary_bivariate.sh "bivariate_null" 1000 50 1000 1
+Running the following code will submit all of the simulations to a Slurm scheduler:
+```{bash}
+chmod u+x *.sh
+./submit_all_alt_investigation.sh
 ```
+If you aren't running on a Slurm scheduler, make sure to edit the appropriate lines (flagged in each file). You can run this code locally, but it will take some time.
 
-This code creates 2 job arrays (one for the alternative hypothesis and one for the null hypothesis), each with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
-```{sh}
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 1
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 1
+## Properties of our proposal under the null hypothesis
+
+The following code will replicate the results in Section 5.2 of the main manuscript (Figure 3) and Section 4.3 of the Supplementary Material (Figures S5--S8).
+
+The simulation uses the following files:
+* `submit_all_null_investigation.sh`: Submit all simulations for this section.
+* `submit_null_investigation.sh`: Batch submission of a group of jobs to a Slurm scheduler.
+* `investigate_null_properties.R`: the main R script for this simulation. Runs the simulation `nreps_per_job` times for a specified set of parameters.
+* `investigate_null_once.R`: Runs the simulation a single time for a specified set of parameters.
+* `gen_data.R`: Generate a dataset.
+* `run_ests.R`: Run a single estimator (SuperLearner, random forests, logistic regression, GAMs, etc.) with or without cross-fitting and sample-splitting
+* `utils.R`: Utility functions.
+
+Running the following code will submit all of the simulations to a Slurm scheduler:
+```{bash}
+chmod u+x *.sh
+./submit_all_null_investigation.sh
 ```
+If you aren't running on a Slurm scheduler, make sure to edit the appropriate lines (flagged in each file). You can run this code locally, but it will take some time.
 
-## Plug-in estimators (not cross-fitted) based on flexible techniques
+## Using the bootstrap for interval estimation
 
-This simulation may be executed from the command line as follows:
+The following code will replicate the results in Section 4.4 of the Supplementary Material (Figures S9--S12).
 
-```{sh}
-./submit_all_sim_binary_bivariate.sh "bivariate_loss" 1000 50 1000 0
-./submit_all_sim_binary_bivariate.sh "bivariate_null" 1000 50 1000 0
+The simulation uses the following files:
+* `submit_all_boot_investigation.sh`: Submit all simulations for this section.
+* `submit_alt_investigation.sh`: Batch submission of a group of jobs to a Slurm scheduler.
+* `investigate_alternative_properties.R`: the main R script for this simulation. Runs the simulation `nreps_per_job` times for a specified set of parameters.
+* `investigate_alternative_once.R`: Runs the simulation a single time for a specified set of parameters.
+* `gen_data.R`: Generate a dataset.
+* `run_ests.R`: Run a single estimator (SuperLearner, random forests, logistic regression, GAMs, etc.) with or without cross-fitting and sample-splitting
+* `utils.R`: Utility functions.
+
+Running the following code will submit all of the simulations to a Slurm scheduler:
+```{bash}
+chmod u+x *.sh
+./submit_all_boot_investigation.sh
 ```
+If you aren't running on a Slurm scheduler, make sure to edit the appropriate lines (flagged in each file). You can run this code locally, but it will take some time.
 
-This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
-```{sh}
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss" --cv 0
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null" --cv 0
+## Higher dimensions and correlated features
+
+The following code will replicate the results in Section 4.5 of the Supplementary Material (Figures S13--S16).
+
+The simulation uses the following files:
+* `submit_all_highdim_investigation.sh`: Submit all simulations for this section.
+* `submit_null_investigation.sh`: Batch submission of a group of jobs to a Slurm scheduler.
+* `investigate_null_properties.R`: the main R script for this simulation. Runs the simulation `nreps_per_job` times for a specified set of parameters.
+* `investigate_null_once.R`: Runs the simulation a single time for a specified set of parameters.
+* `gen_data.R`: Generate a dataset.
+* `run_ests.R`: Run a single estimator (SuperLearner, random forests, logistic regression, GAMs, etc.) with or without cross-fitting and sample-splitting
+* `utils.R`: Utility functions.
+
+Running the following code will submit all of the simulations to a Slurm scheduler:
+```{bash}
+chmod u+x *.sh
+./submit_all_highdim_investigation.sh
 ```
+If you aren't running on a Slurm scheduler, make sure to edit the appropriate lines (flagged in each file). You can run this code locally, but it will take some time.
 
-## Cross-fitted and non-cross-fitted plug-in estimators using only parametric algorithms
+## Compiling results and making figures
 
-This simulation may be executed from the command line as follows:
-
-```{sh}
-./submit_all_sim_binary_bivariate.sh "bivariate_loss_simple_lib" 1000 50 1000 1
-./submit_all_sim_binary_bivariate.sh "bivariate_null_simple_lib" 1000 50 1000 1
-
-./submit_all_sim_binary_bivariate.sh "bivariate_loss_simple_lib" 1000 50 1000 0
-./submit_all_sim_binary_bivariate.sh "bivariate_null_simple_lib" 1000 50 1000 0
+Once you have results from all of the simulations, you can run the following code to create all of the figures:
+```{bash}
+chmod u+x *.sh
+./create_all_plots.sh
 ```
-
-This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
-```{sh}
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_simple_lib" --cv 1
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_simple_lib" --cv 1
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_loss_simple_lib" --cv 0
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_null_simple_lib" --cv 0
-```
-
-
-## Effect of not carefully specifying the reward function
-
-This simulation may be executed from the command line as follows:
-
-```{sh}
-./submit_all_sim_binary_bivariate.sh "bivariate_naive" 1000 50 1000 0
-```
-
-This code creates one job array with 400 jobs. Once you have the results from this simulation, run the code in `load_sim_binary_bivariate.R` (using the same arguments that you used to create this output) to generate plots and summaries of the results:
-```{sh}
-Rscript load_sim_binary_bivariate.R --sim-name "bivariate_naive" --risk-type "naive" --cv 1
-```
+This code calls, in turn:
+* `load_sim_alt_lowdim.R`: load simulations from the alternative hypothesis simulation and create plots
+* `load_sim_bootstrap.R`: load simulations from the bootstrap simulation and create plots
+* `load_sim_null.R`: load simulations from the null hypothesis simulation and create plots
+* `load_sim_highdim.R`: load simulations from the higher-dimensional simulation and create plots
+* `create_combined_plots.R`: combine plots together for the supplement
