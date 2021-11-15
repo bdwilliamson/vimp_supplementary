@@ -54,7 +54,7 @@ truths_corr <- cbind.data.frame(type = c("accuracy", "auc"),
 colnames(truths_corr) <- c("type", paste0("j_", c("1", "2", "3", "4", "13_group", "24_group")))
 rownames(truths_corr) <- NULL
 saveRDS(truths_corr,
-        here("true_vals_probit_corr.rds"))
+        here("code", "sims", "true_vals_probit_corr.rds"))
 
 # ------------------------------------------------------------------------------
 # UNCORRELATED DATA
@@ -96,4 +96,4 @@ colnames(truths_uncorr) <- c("type", paste0("j_", c("1", "2", "3", "4", "13_grou
 rownames(truths_uncorr) <- NULL
 
 saveRDS(truths_uncorr,
-        here("true_vals_probit.rds"))
+        here("code", "sims", "true_vals_probit.rds"))

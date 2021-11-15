@@ -22,7 +22,7 @@ if (is.na(job_id)) { # if running locally
   job_id <- 1
   # require vimp version >= 2.2.0
   library("vimp")
-  code_prefix <- "sim_code"
+  code_prefix <- "code/sims"
   prefix <- "sim_output/"
 } else {
   # require vimp version >= 2.2.0

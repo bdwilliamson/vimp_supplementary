@@ -11,7 +11,7 @@ library("tibble")
 library("here")
 library("data.table")
 
-code_dir <- "sim_code"
+code_dir <- "code/sims"
 source(here(code_dir, "utils.R"))
 
 parser <- ArgumentParser()

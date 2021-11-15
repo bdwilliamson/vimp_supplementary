@@ -13,9 +13,9 @@ library("argparse")
 library("here")
 library("kableExtra")
 
-source(here("code", "utils.R"))
-source(here("code", "get_variable_groups.R"))
-plots_dir <- "plots/all_vrc01_plots"
+source(here("code", "data_analysis", "utils.R"))
+source(here("code", "data_analysis", "get_variable_groups.R"))
+plots_dir <- here("plots/all_vrc01_plots")
 if (!dir.exists(here(plots_dir))) {
     dir.create(here(plots_dir), recursive = TRUE)
 }
@@ -49,10 +49,10 @@ args <- parser$parse_args()
 print(args)
 
 # read in the data
-dat <- readRDS(here("code", "data", "analysis_data.rds"))
+dat <- readRDS(here("code", "data_analysis", "data", "analysis_data.rds"))
 
 # if reduce_library, run with small lib
-source(here("code", "super_learner_libraries.R"))
+source(here("code", "data_analysis", "super_learner_libraries.R"))
 if (args$reduce_library) {
     learner_lib <- library_reduced
 } else {

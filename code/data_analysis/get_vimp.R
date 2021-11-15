@@ -19,7 +19,7 @@ if (is.na(Sys.getenv("RSTUDIO", unset = NA))) {
     code_dir <- ""
 } else {
     library("vimp")
-    code_dir <- "code"
+    code_dir <- "code/data_analysis"
 }
 
 source(here(code_dir, "utils.R"))

@@ -19,7 +19,7 @@ dataset <- rbind(data1, data2)
 dataset$ic50.censored <- as.numeric(dataset$ic50.censored)
 dataset$sens50 <- as.numeric(dataset$ic50.geometric.mean.imputed < 1)
 dataset$sens80 <- as.numeric(dataset$ic80.geometric.mean.imputed < 1)
-if (!dir.exists("data/")) {
-    dir.create("data/", recursive = TRUE)
+if (!dir.exists(here::here("code", "data_analysis", "data"))) {
+    dir.create(here::here("code", "data_analysis", "data"), recursive = TRUE)
 }
-saveRDS(dataset, "data/analysis_data.rds")
+saveRDS(dataset, here::here("code", "data_analysis", "data", "analysis_data.rds"))

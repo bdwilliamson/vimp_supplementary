@@ -12,7 +12,7 @@ library("here")
 if (is.na(Sys.getenv("RSTUDIO", unset = NA))) {
     code_dir <- ""
 } else {
-    code_dir <- "code"
+    code_dir <- "code/data_analysis"
 }
 source(here(code_dir, "get_variable_groups.R"))
 source(here(code_dir, "super_learner_libraries.R"))
